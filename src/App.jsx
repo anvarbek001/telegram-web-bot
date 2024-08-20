@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import './App.css'
 import Card from './components/card/card';
 import Cart from './components/cart/cart';
@@ -7,14 +7,14 @@ import { getData } from './constants/db'
 const courses = getData();
 
 
-const telegra  = window.Telegram.WebApp;
+const telegram  = window.Telegram.WebApp;
 
 const App = () => {
 
   const [cardItems,setCardItems] = useState([])
 
   useEffect(() => {
-    telegra.ready()
+    telegram.ready()
   })
 
   const onAddItem = (item) => {
@@ -44,9 +44,19 @@ const App = () => {
   }
 
   const onCheckout = () => {
-    telegra.MainButton.text = 'Sotib olish :)'
-    telegra.MainButton.show();
+    telegram.MainButton.text = 'Sotib olish :)'
+    telegram.MainButton.show();
   }
+
+  const onSendData = useCallback(() => {
+    telegram.sendData(JSON.stringify(cardItems))
+  },[cardItems])
+
+  useEffect(() => {
+    telegram.onEvent("mainButtonClicked",onSendData)
+
+    return() => telegram.offEvent("mainButtonClicked",onSendData)
+  },[onSendData])
 
   return (
     <>
